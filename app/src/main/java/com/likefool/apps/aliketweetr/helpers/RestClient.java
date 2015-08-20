@@ -40,6 +40,26 @@ public class RestClient extends OAuthBaseClient {
 		getClient().get(apiUrl, params, handler);
 	}
 
+	// Get Mention Timeline /statuses/mentions_timeline.json
+	// count = 25
+	// since_id=1
+	public void getMentionTimeline(int page, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("statuses/mentions_timeline.json");
+/*
+		RequestParams params = new RequestParams();
+		params.put("count", filter.getMentionCount());
+		params.put("exclude_replies", false);
+		Long maxId = filter.getMentionMaxId();
+		if (maxId > 0) {
+			params.put("max_id", maxId);
+		}
+		*/
+		RequestParams params = new RequestParams();
+		params.put("page", String.valueOf(page));
+		// Execute Request
+		getClient().get(apiUrl, params, handler);
+	}
+
 	public void postTweet(String body, AsyncHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/update.json");
 		RequestParams params = new RequestParams();

@@ -19,8 +19,11 @@ import java.util.List;
  * Created by aliku on 2015/8/13.
  */
 public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
+    Context context;
+
     public TweetsArrayAdapter(Context context, List<Tweet> tweets) {
         super(context, android.R.layout.simple_list_item_1, tweets);
+        this.context = context;
     }
 
     // override and setup custom template
