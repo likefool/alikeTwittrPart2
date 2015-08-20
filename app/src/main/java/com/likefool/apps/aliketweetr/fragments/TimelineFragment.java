@@ -18,6 +18,7 @@ import com.likefool.apps.aliketweetr.adapters.TweetsArrayAdapter;
 import com.likefool.apps.aliketweetr.helpers.EndlessScrollListener;
 import com.likefool.apps.aliketweetr.helpers.RestClient;
 import com.likefool.apps.aliketweetr.models.Tweet;
+import com.likefool.apps.aliketweetr.models.TwitterUser;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.apache.http.Header;
@@ -45,15 +46,15 @@ public class TimelineFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private  LayoutInflater inflater;
-    protected View rootView;
+    private LayoutInflater inflater;
+    private View rootView;
+
     private RestClient client;
+    private TwitterUser user;
     private ArrayList<Tweet> tweets;
     private TweetsArrayAdapter tweetAdapter;
     private ListView lvTweets;
     private SwipeRefreshLayout swipeContainer;
-
-
 
     /**
      * Use this factory method to create a new instance of
@@ -68,6 +69,15 @@ public class TimelineFragment extends Fragment {
         Bundle args = new Bundle();
         args.putString(ARG_TAB, tab);
         fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static TimelineFragment newInstance(TwitterUser user) {
+        TimelineFragment fragment = new TimelineFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_TAB, "profile");
+        fragment.setArguments(args);
+        fragment.user = user;
         return fragment;
     }
 
@@ -122,8 +132,35 @@ public class TimelineFragment extends Fragment {
     }
 
     private void populateTimeline(int i) {
-        if (mTab == "home") {
-            client.getHomeTimeline(i, new JsonHttpResponseHandler() {
+        if (mTab == "profile") {
+            client.getUserTimeline(i, new JsonHttpResponseHandler() {
+                // Success
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
+                    tweetAdapter.addAll(Tweet.fromJSONArray(json));
+                    // Now we call setRefreshing(false) to signal refresh has finished
+                    swipeContainer.setRefreshing(false);
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject response) {
+                    if (response != null) {
+                        Log.e("ERROR", "populateTimeline fail, response: " + response.toString());
+                    }
+                    //Toast.makeText(this, "Timeline Fail", Toast.LENGTH_SHORT).show();
+
+                    // Query ActiveAndroid for list of data
+                    List<Tweet> localTweets = new Select().from(Tweet.class)
+                            .orderBy("CreatedAt DESC").limit(100).execute();
+                    tweetAdapter.addAll(localTweets);
+                    swipeContainer.setRefreshing(false);
+
+                }
+
+
+            }, user.getScreenName());
+        } else if (mTab == "mention") {
+            client.getMentionTimeline(i, new JsonHttpResponseHandler() {
                 // Success
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
@@ -150,7 +187,7 @@ public class TimelineFragment extends Fragment {
 
             });
         } else {
-            client.getMentionTimeline(i, new JsonHttpResponseHandler() {
+            client.getHomeTimeline(i, new JsonHttpResponseHandler() {
                 // Success
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray json) {

@@ -1,6 +1,7 @@
 package com.likefool.apps.aliketweetr.helpers;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.codepath.oauth.OAuthBaseClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -60,6 +61,20 @@ public class RestClient extends OAuthBaseClient {
 		getClient().get(apiUrl, params, handler);
 	}
 
+	public void getUserTimeline(int page, AsyncHttpResponseHandler handler, String screenName) {
+		String apiUrl = getApiUrl("statuses/user_timeline.json");
+		RequestParams params = new RequestParams();
+		//params.put("count", filter.getUserCount());
+		//Long maxId = filter.getUserMaxId();
+		//if (maxId > 0) {
+		//	params.put("max_id", maxId);
+		//}
+		params.put("page", String.valueOf(page));
+		params.put("screen_name", screenName);
+		// Execute Request
+		getClient().get(apiUrl, params, handler);
+	}
+
 	public void postTweet(String body, AsyncHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/update.json");
 		RequestParams params = new RequestParams();
@@ -72,6 +87,12 @@ public class RestClient extends OAuthBaseClient {
         //RequestParams params = new RequestParams();
         getClient().get(apiUrl, null, handler);
     }
+
+	public void getUserProfile(JsonHttpResponseHandler handler) {
+		Log.d("my", "call getting user profile api");
+		String apiUrl = getApiUrl("account/verify_credentials.json");
+		getClient().get(apiUrl, new RequestParams(), handler);
+	}
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");

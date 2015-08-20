@@ -4,27 +4,24 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.likefool.apps.aliketweetr.R;
+import com.likefool.apps.aliketweetr.RestApplication;
 import com.likefool.apps.aliketweetr.adapters.TimelineFragmentPagerAdapter;
-import com.likefool.apps.aliketweetr.adapters.TweetsArrayAdapter;
 import com.likefool.apps.aliketweetr.fragments.TimelineFragment;
-import com.likefool.apps.aliketweetr.helpers.RestClient;
-import com.likefool.apps.aliketweetr.models.Tweet;
+import com.likefool.apps.aliketweetr.models.TwitterUser;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
-import java.util.ArrayList;
+import org.apache.http.Header;
+import org.json.JSONObject;
 
 public class TimelineActivity extends ActionBarActivity implements TimelineFragment.OnFragmentInteractionListener {
 
-    private RestClient client;
-    private ArrayList<Tweet> tweets;
-    private TweetsArrayAdapter tweetAdapter;
-    private ListView lvTweets;
-
+    private TwitterUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,5 +81,29 @@ public class TimelineActivity extends ActionBarActivity implements TimelineFragm
     public void onFragmentInteraction() {
         return;
 
+    }
+
+    public void onClickProfile(MenuItem item) {
+        RestApplication.getRestClient().getUserProfile(new JsonHttpResponseHandler() {
+            // SUCCESS
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                user = new TwitterUser(response);
+                goUserProfile(user);
+            }
+
+            // FAILURE
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.d("my", "verify credentials api fail" + errorResponse.toString());
+            }
+        });
+
+    }
+
+    public void goUserProfile(TwitterUser user) {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        intent.putExtra("user", user);
+        startActivity(intent);
     }
 }
