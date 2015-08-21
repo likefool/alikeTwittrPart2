@@ -133,11 +133,18 @@ public class TimelineFragment extends Fragment {
 
     private void populateTimeline(int i) {
         if (mTab == "profile") {
+            if (i == 1) {
+                client.getFilter().resetUserTimeline();
+                tweetAdapter.clear();
+
+            }
             client.getUserTimeline(i, new JsonHttpResponseHandler() {
                 // Success
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                    tweetAdapter.addAll(Tweet.fromJSONArray(json));
+                    ArrayList<Tweet> newTweets = Tweet.fromJSONArray(json);
+                    tweetAdapter.addAll(newTweets);
+                    client.getFilter().updateUserMaxId(newTweets);
                     // Now we call setRefreshing(false) to signal refresh has finished
                     swipeContainer.setRefreshing(false);
                 }
@@ -160,11 +167,17 @@ public class TimelineFragment extends Fragment {
 
             }, user.getScreenName());
         } else if (mTab == "mention") {
+            if (i == 1) {
+                client.getFilter().resetMentionTimeline();
+                tweetAdapter.clear();
+            }
             client.getMentionTimeline(i, new JsonHttpResponseHandler() {
                 // Success
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                    tweetAdapter.addAll(Tweet.fromJSONArray(json));
+                    ArrayList<Tweet> newTweets = Tweet.fromJSONArray(json);
+                    tweetAdapter.addAll(newTweets);
+                    client.getFilter().updateMentionMaxId(newTweets);
                     // Now we call setRefreshing(false) to signal refresh has finished
                     swipeContainer.setRefreshing(false);
                 }
@@ -187,11 +200,19 @@ public class TimelineFragment extends Fragment {
 
             });
         } else {
+            if (i == 1) {
+                client.getFilter().resetHomeTimeline();
+                tweetAdapter.clear();
+
+            }
             client.getHomeTimeline(i, new JsonHttpResponseHandler() {
                 // Success
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                    tweetAdapter.addAll(Tweet.fromJSONArray(json));
+                    ArrayList<Tweet> newTweets = Tweet.fromJSONArray(json);
+                    tweetAdapter.addAll(newTweets);
+                    client.getFilter().updateHomeMaxId(newTweets);
+
                     // Now we call setRefreshing(false) to signal refresh has finished
                     swipeContainer.setRefreshing(false);
                 }

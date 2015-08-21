@@ -30,14 +30,27 @@ public class RestClient extends OAuthBaseClient {
 	public static final String REST_CONSUMER_SECRET = "xxK4PWxSJnbERyIADldCYJiMFTzHyXwDLK8TDAZEQZcWJvRQ8O"; // Change this
 	public static final String REST_CALLBACK_URL = "oauth://codepathtweets"; // Change this (here and in manifest)
 
+	private TwitterClientFilter filter;
+
 	public RestClient(Context context) {
 		super(context, REST_API_CLASS, REST_URL, REST_CONSUMER_KEY, REST_CONSUMER_SECRET, REST_CALLBACK_URL);
+		filter = new TwitterClientFilter();
+	}
+
+	public TwitterClientFilter getFilter() {
+		return filter;
 	}
 
 	public void getHomeTimeline(int page, AsyncHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/home_timeline.json");
 		RequestParams params = new RequestParams();
-		params.put("page", String.valueOf(page));
+		params.put("count", filter.getHomeCount());
+		params.put("exclude_replies", false);
+		Long maxId = filter.getHomeMaxIdId();
+		if (maxId > 0) {
+			params.put("max_id", maxId);
+		}
+		//params.put("page", String.valueOf(page));
 		getClient().get(apiUrl, params, handler);
 	}
 
@@ -46,7 +59,7 @@ public class RestClient extends OAuthBaseClient {
 	// since_id=1
 	public void getMentionTimeline(int page, AsyncHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/mentions_timeline.json");
-/*
+
 		RequestParams params = new RequestParams();
 		params.put("count", filter.getMentionCount());
 		params.put("exclude_replies", false);
@@ -54,9 +67,7 @@ public class RestClient extends OAuthBaseClient {
 		if (maxId > 0) {
 			params.put("max_id", maxId);
 		}
-		*/
-		RequestParams params = new RequestParams();
-		params.put("page", String.valueOf(page));
+		//params.put("page", String.valueOf(page));
 		// Execute Request
 		getClient().get(apiUrl, params, handler);
 	}
@@ -64,12 +75,12 @@ public class RestClient extends OAuthBaseClient {
 	public void getUserTimeline(int page, AsyncHttpResponseHandler handler, String screenName) {
 		String apiUrl = getApiUrl("statuses/user_timeline.json");
 		RequestParams params = new RequestParams();
-		//params.put("count", filter.getUserCount());
-		//Long maxId = filter.getUserMaxId();
-		//if (maxId > 0) {
-		//	params.put("max_id", maxId);
-		//}
-		params.put("page", String.valueOf(page));
+		params.put("count", filter.getUserCount());
+		Long maxId = filter.getUserMaxId();
+		if (maxId > 0) {
+			params.put("max_id", maxId);
+		}
+		//params.put("page", String.valueOf(page));
 		params.put("screen_name", screenName);
 		// Execute Request
 		getClient().get(apiUrl, params, handler);
