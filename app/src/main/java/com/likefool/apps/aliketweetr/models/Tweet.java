@@ -20,7 +20,7 @@ public class Tweet extends Model {
     @Column(name = "Uid")
     private long uid; // unique id for the tweet
     @Column(name = "User")
-    private User user;
+    private TwitterUser user;
     @Column(name = "CreatedAt")
     private String createdAt;
 
@@ -36,7 +36,7 @@ public class Tweet extends Model {
         return createdAt;
     }
 
-    public User getUser() {
+    public TwitterUser getUser() {
         return user;
     }
 
@@ -46,7 +46,7 @@ public class Tweet extends Model {
             tweet.body = jsonObject.getString("text");
             tweet.uid = jsonObject.getLong("id");
             tweet.createdAt = jsonObject.getString("created_at");
-            tweet.user = User.fromJSON(jsonObject.getJSONObject("user"));
+            tweet.user = new TwitterUser(jsonObject.getJSONObject("user"));
             tweet.save(); // insert into sqllite
         } catch (JSONException e) {
             e.printStackTrace();
